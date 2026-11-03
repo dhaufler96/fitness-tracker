@@ -1,14 +1,5 @@
-/**
- * AuthContext manages the user's authentication state by storing a token,
- * It provides functions for the user to register, log in, and log out,
- * all of which update the token in state.
- */
-
 import { createContext, useContext, useState } from "react";
-
-// import.meta.env allows us to access environment variables,
-// which are defined in a file named .env
-const API = import.meta.env.VITE_API;
+import { API } from "../api/activities";
 
 const AuthContext = createContext();
 
@@ -21,10 +12,13 @@ export function AuthProvider({ children }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(credentials),
     });
+
     const result = await response.json();
+
     if (!response.ok) {
       throw Error(result.message);
     }
+
     setToken(result.token);
   };
 
@@ -34,21 +28,33 @@ export function AuthProvider({ children }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(credentials),
     });
+
     const result = await response.json();
+
     if (!response.ok) {
       throw Error(result.message);
     }
+
     setToken(result.token);
   };
 
   const logout = () => setToken(null);
 
   const value = { token, register, login, logout };
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (!context) throw Error("useAuth must be used within AuthProvider");
+
+  if (!context) {
+    throw Error("useAuth must be used within AuthProvider");
+  }
+
   return context;
 }

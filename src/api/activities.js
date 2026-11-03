@@ -1,21 +1,20 @@
-const API = import.meta.env.VITE_API;
+export const API = "https://fitnestrac-kr.herokuapp.com/api";
 
-/** Fetches an array of activities from the API. */
 export async function getActivities() {
   try {
     const response = await fetch(API + "/activities");
-    const result = await response.json();
-    return result;
+
+    if (!response.ok) {
+      throw Error("Could not get activities");
+    }
+
+    return await response.json();
   } catch (e) {
     console.error(e);
     return [];
   }
 }
 
-/**
- * Sends a new activity to the API to be created.
- * A valid token is required.
- */
 export async function createActivity(token, activity) {
   if (!token) {
     throw Error("You must be signed in to create an activity.");
@@ -33,5 +32,22 @@ export async function createActivity(token, activity) {
   if (!response.ok) {
     const result = await response.json();
     throw Error(result.message);
+  }
+}
+
+export async function deleteActivity(token, id) {
+  if (!token) {
+    throw Error("You must be signed in to delete an activity.");
+  }
+
+  const response = await fetch(API + "/activities/" + id, {
+    method: "DELETE",
+    headers: {
+      Authorization: "Bearer " + token,
+    },
+  });
+
+  if (!response.ok) {
+    throw Error("You are not authorized to delete this activity.");
   }
 }
